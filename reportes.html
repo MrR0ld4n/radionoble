@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radio Noble - Reportes y Auditoría Global</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background-color: #1a1a2e; color: #fff; padding: 30px; min-height: 100vh;}
+    .box-reporte { background: #162447; border-radius: 8px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .table { background: #1f4068 !important; color: #ffffff !important; }
+    .table th { color: #ffffff !important; background-color: #162447; font-weight: 700; } 
+    .table td { color: #ffffff !important; background-color: #1f4068 !important; border-bottom: 1px solid #162447;}
+  </style>
+</head>
+<body>
+
+  <div class="box-reporte">
+    <div class="level mb-5">
+      <div class="level-left">
+        <div>
+          <h1 class="title is-3 has-text-warning"><i class="fa-solid fa-chart-line"></i> Historial de Transmisiones</h1>
+          <p class="subtitle is-6 has-text-grey-light">Auditoría global unificada de sedes Radio Noble</p>
+        </div>
+      </div>
+      <div class="level-right">
+        <div class="field has-addons">
+          <div class="control">
+            <div class="select">
+              <select id="filtroSede" onchange="cargarHistorialGlobal()">
+                <option value="TODAS">🔍 Ver Todas las Sedes</option>
+                <option value="Valentía (Frontino)">Valentía (Frontino)</option>
+                <option value="Unión Noble (Central)">Unión Noble (Central)</option>
+                <option value="Convicción (MVPS)">Convicción (MVPS)</option>
+                <option value="Confianza (Fresno)">Confianza (Fresno)</option>
+                <option value="Corazon Noble (Guayabal)">Corazon Noble (Guayabal)</option>
+                <option value="Cortesía (San Pedro)">Cortesía (San Pedro)</option>
+                <option value="Evolución (Promisión)">Evolución (Promisión)</option>
+                <option value="Familia (Hato)">Familia (Hato)</option>
+                <option value="Fortaleza (Girardota)">Fortaleza (Girardota)</option>
+                <option value="Lealtad (Platino)">Lealtad (Platino)</option>
+                <option value="Perseverancia (Ciudadela)">Perseverancia (Ciudadela)</option>
+                <option value="Propósito (La Victoria)">Propósito (La Victoria)</option>
+                <option value="Resiliencia (Manizales)">Resiliencia (Manizales)</option>
+                <option value="Transformación (Delta)">Transformación (Delta)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <table class="table is-fullwidth is-striped">
+      <thead>
+        <tr>
+          <th>Sede</th>
+          <th>Colaborador</th>
+          <th>Tema Musical</th>
+          <th>Hora Registro</th>
+          <th>Estado de Cierre</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyReporte">
+        <tr><td colspan="5" class="has-text-centered has-text-grey-light">Selecciona un filtro para procesar los registros...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDbFvZMgoIvN_1Hp_7l-WJ4dLvWI0GQi_I",
+      authDomain: "radionoble-a040c.firebaseapp.com",
+      databaseURL: "https://radionoble-a040c-default-rtdb.firebaseio.com",
+      projectId: "radionoble-a040c",
+      storageBucket: "radionoble-a040c.firebasestorage.app",
+      messagingSenderId: "541307166879",
+      appId: "1:541307166879:web:34475c1d77f849e7afc2aa"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Arranca cargando el historial general de forma inmediata
+    cargarHistorialGlobal();
+
+    function cargarHistorialGlobal() {
+      var filtro = document.getElementById("filtroSede").value;
+      var tbody = document.getElementById("tbodyReporte");
+      tbody.innerHTML = "";
+
+      db.ref("colas").once("value", snapshot => {
+        var colasSedes = snapshot.val();
+        if(!colasSedes) {
+          tbody.innerHTML = `<tr><td colspan="5" class="has-text-centered has-text-grey-light">No hay registros de música almacenados en la base de datos.</td></tr>`;
+          return;
+        }
+
+        var hayRegistros = false;
+
+        Object.keys(colasSedes).forEach(sedeKey => {
+          var canciones = colasSedes[sedeKey];
+          
+          Object.keys(canciones).forEach(key => {
+            var item = canciones[key];
+            
+            // Filtro dinámico inteligente
+            var ramaLimpiaFiltro = filtro.replace(/[^a-zA-Z0-9]/g, "");
+            if (filtro !== "TODAS" && sedeKey !== ramaLimpiaFiltro) return;
+
+            // Mostrar solo temas que ya cerraron ciclo (Finalizadas o Saltadas)
+            if (item.estado !== "En espera" && item.estado !== "Sonando") {
+              hayRegistros = true;
+              tbody.innerHTML += `<tr>
+                <td><span class="tag is-dark">${sedeKey}</span></td>
+                <td><strong>${item.usuario}</strong><br><small>${item.correo || 'automático'}</small></td>
+                <td>${item.titulo}</td>
+                <td>${item.hora}</td>
+                <td><span class="tag is-light">${item.estado}</span></td>
+              </tr>`;
+            }
+          });
+        });
+
+        if(!hayRegistros) {
+          tbody.innerHTML = `<tr><td colspan="5" class="has-text-centered has-text-grey-light">No hay registros históricos que coincidan con la selección actual.</td></tr>`;
+        }
+      });
+    }
+  </script>
+</body>
+</html>

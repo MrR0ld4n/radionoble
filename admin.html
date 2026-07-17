@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radio Noble - Panel de Administración Oficial</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap');
+    
+    body { 
+      background-color: #0d0d0d; 
+      color: #fff; 
+      font-family: 'Montserrat', sans-serif;
+      padding: 30px 20px; 
+      min-height: 100vh;
+    }
+
+    /* 💼 CAJA DE INGRESO SEGURO CON TU DEGRADADO CROMÁTICO */
+    .box-login-admin { 
+      max-width: 450px; 
+      margin: 80px auto; 
+      background: linear-gradient(rgba(10, 10, 10, 0.88), rgba(10, 10, 10, 0.88)) padding-box,
+                  linear-gradient(135deg, #fcd303, #47b85d, #307ebf, #683bb5, #b82375, #d12828, #f27424) border-box;
+      border: 1.5px solid transparent;
+      padding: 40px 35px; 
+      border-radius: 20px; 
+      box-shadow: 0 15px 35px rgba(0,0,0,0.7); 
+    }
+
+    /* 🌈 CONTENEDORES PREMIUM PARA LA INTERFAZ ACTIVA */
+    .card-premium-admin {
+      background: linear-gradient(#141414, #141414) padding-box,
+                  linear-gradient(135deg, #fcd303, #47b85d, #307ebf, #683bb5, #b82375, #d12828, #f27424) border-box;
+      border: 1.5px solid transparent;
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      margin-bottom: 30px;
+    }
+
+    .contenedor-scroll-cola { 
+      max-height: 330px; 
+      overflow-y: auto; 
+      border-radius: 8px; 
+      background: #181818; 
+      border: 1px solid #252525;
+    }
+
+    /* 📊 TABLAS ESTILO SPOTIFY / PREMIUM OSCURO */
+    .table { background: #181818 !important; color: #ffffff !important; width: 100% !important; margin-bottom: 0 !important;}
+    .table th { color: #8c8c8c !important; background-color: #111111 !important; position: sticky; top: 0; z-index: 10; font-weight: 700; border-bottom: 2px solid #222 !important; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;} 
+    .table td { color: #e0e0e0 !important; background-color: #181818 !important; vertical-align: middle; border-bottom: 1px solid #222 !important; font-size: 0.85rem; padding: 12px 15px;}
+    .table tr:hover td { background-color: #202020 !important; }
+
+    .label { color: #8c8c8c !important; font-size: 0.85rem !important; font-weight: 600 !important; }
+    .input, .select select { background-color: #181818 !important; color: #fff !important; border: 1px solid #2a2a2a !important; border-radius: 8px !important;}
+    .input:focus, .select select:focus { border-color: #444 !important; box-shadow: none !important; }
+
+    .btn-master {
+      background: linear-gradient(90deg, #fcd303, #47b85d, #307ebf, #683bb5, #b82375, #d12828, #f27424);
+      border: none; color: #fff; font-weight: 600; border-radius: 20px; transition: transform 0.2s;
+    }
+    .btn-master:hover { color: #fff; transform: scale(1.02); }
+  </style>
+</head>
+<body>
+
+  <!-- PANTALLA SEGURA: SELECCIÓN Y PIN DE SEDE -->
+  <div id="pantallaLogin" class="box-login-admin">
+    <h2 class="title is-4 has-text-white has-text-centered mb-5" style="font-weight:800; letter-spacing:0.5px;">🔑 PANEL MASTER</h2>
+    <div class="field mt-4">
+      <label class="label">Selecciona la Sede:</label>
+      <div class="control">
+        <div class="select is-fullwidth">
+          <select id="loginSede">
+            <option value="Valentía (Frontino)">Valentía (Frontino)</option>
+            <option value="Unión Noble (Central)">Unión Noble (Central)</option>
+            <option value="Convicción (MVPS)">Convicción (MVPS)</option>
+            <option value="Confianza (Fresno)">Confianza (Fresno)</option>
+            <option value="Corazon Noble (Guayabal)">Corazon Noble (Guayabal)</option>
+            <option value="Cortesía (San Pedro)">Cortesía (San Pedro)</option>
+            <option value="Evolución (Promisión)">Evolución (Promisión)</option>
+            <option value="Familia (Hato)">Familia (Hato)</option>
+            <option value="Fortaleza (Girardota)">Fortaleza (Girardota)</option>
+            <option value="Lealtad (Platino)">Lealtad (Platino)</option>
+            <option value="Perseverancia (Ciudadela)">Perseverancia (Ciudadela)</option>
+            <option value="Propósito (La Victoria)">Propósito (La Victoria)</option>
+            <option value="Resiliencia (Manizales)">Resiliencia (Manizales)</option>
+            <option value="Transformación (Delta)">Transformación (Delta)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="field mb-5">
+      <label class="label">PIN de Seguridad Sede:</label>
+      <div class="control">
+        <input class="input" type="password" id="loginPin" placeholder="****" maxlength="4" style="height:44px; text-align:center;">
+      </div>
+    </div>
+    <button class="button is-fullwidth btn-master" style="height:46px;" onclick="validarIngresoSede()">Acceder al Monitoreo</button>
+  </div>
+
+  <!-- INTERFAZ PRINCIPAL DEL PANEL DE CONTROL -->
+  <div id="interfazPrincipal" style="display: none;">
+    <div class="container is-fluid">
+      
+      <div class="columns">
+        <!-- REPRODUCTOR -->
+        <div class="column is-4">
+          <div class="card-premium-admin">
+            <h2 class="title is-5 has-text-white mb-4" id="lblSedeTitulo" style="font-weight:800; text-transform:uppercase;">📺 Canal Radio</h2>
+            <div id="player" style="width: 100%; height: 250px; background: #000; border-radius: 10px; border: 1px solid #222;"></div>
+            <p class="is-size-7 has-text-centered mt-3" id="lblTrack" style="color:#8c8c8c; font-weight:600;">Sincronizando transmisiones...</p>
+          </div>
+        </div>
+
+        <!-- COLA ACTUAL -->
+        <div class="column is-8">
+          <div class="card-premium-admin">
+            <div class="level mb-4">
+              <div class="level-left">
+                <h2 class="title is-5 has-text-white" style="font-weight:800;">📋 Cola de Transmisión Sede</h2>
+              </div>
+              <div class="level-right">
+                <span class="tag is-dark has-text-weight-bold" id="lblContador" style="color:#fcd303; border: 1px solid #333;">0 en espera</span>
+              </div>
+            </div>
+            
+            <div class="contenedor-scroll-cola">
+              <table class="table is-fullwidth">
+                <thead>
+                  <tr>
+                    <th>Solicitante</th>
+                    <th>Canción / Artista</th>
+                    <th>Hora</th>
+                    <th class="has-text-right">Estado / Acción</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaCola"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN AUDITORÍA -->
+      <div class="card-premium-admin">
+        <h2 class="title is-5 has-text-white mb-4" style="font-weight:800;">📊 Gestión de Colaboradores y Cuotas Diarias</h2>
+        <div class="contenedor-scroll-cola" style="max-height: 380px;">
+          <table class="table is-fullwidth">
+            <thead>
+              <tr>
+                <th>Colaborador Identificado</th>
+                <th>Historial de Solicitudes Diarias</th>
+                <th>Estado del Perfil</th>
+                <th class="has-text-right">Acciones de Control</th>
+              </tr>
+            </thead>
+            <tbody id="tablaAuditoria"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
+
+  <script>
+    const PINS_SEDES = {
+      "Valentía (Frontino)": "1010", "Unión Noble (Central)": "2020", "Convicción (MVPS)": "3030",
+      "Confianza (Fresno)": "4040", "Corazon Noble (Guayabal)": "5050", "Cortesía (San Pedro)": "6060",
+      "Evolución (Promisión)": "7070", "Familia (Hato)": "8080", "Fortaleza (Girardota)": "9090",
+      "Lealtad (Platino)": "1111", "Perseverancia (Ciudadela)": "2222", "Propósito (La Victoria)": "3333",
+      "Resiliencia (Manizales)": "4444", "Transformación (Delta)": "5555"
+    };
+
+    const TODAS_LAS_RAMAS_SEDES = [
+      "ValentiaFrontino", "UnionNobleCentral", "ConviccionMVPS", "ConfianzaFresno", "CorazonNobleGuayabal",
+      "CortesiaSanPedro", "EvolucionPromision", "FamiliaHato", "FortalezaGirardota", "LealtadPlatino",
+      "PerseveranciaCiudadela", "PropositoLaVictoria", "ResilienciaManizales", "TransformacionDelta"
+    ];
+
+    const CRONOGRAMA_ANUNCIOS = [
+      { nombre: "PC2Manuela", id: "al6ONlrXGGM", hora: "08:00" },
+      { nombre: "PC2Luis", id: "x8NqzqnJUQA", hora: "08:30" },
+      { nombre: "PC1Manuela", id: "YSKzud7QQ7s", hora: "09:00" },
+      { nombre: "PC1Luis", id: "Gg0U7xRNEH8", hora: "09:30" },
+      { nombre: "Conc1Vanessa", id: "6iOCfR3e0h4", hora: "10:00" },
+      { nombre: "Conc1Jose", id: "Yqk7i7c_tYU", hora: "10:30" },
+      { nombre: "Val1Vannesa", id: "G-ahw9HT7V0", hora: "11:00" },
+      { nombre: "Hosp1Sara", id: "5eNgoxgs6sM", hora: "11:30" },
+      { nombre: "Leal1Sara", id: "c_aUJ7bW5HI", hora: "12:00" },
+      { nombre: "Lid1Vanessa", id: "9YYtPK4xfqc", hora: "12:30" },
+      { nombre: "PE1Jose", id: "ADzC2RbC4Zk", hora: "13:00" },
+      { nombre: "Hosp1Vannesa", id: "IM-GRvQXI3s", hora: "13:30" },
+      { nombre: "PE1Sara", id: "M-Wxl0-L9fs", hora: "14:00" },
+      { nombre: "Prop1Luis", id: "ejyANgP49Ag", hora: "14:30" },
+      { nombre: "PE1Manuela", id: "nNRRGadg9Vo", hora: "15:00" },
+      { nombre: "PE1Sara", id: "M-Wxl0-L9fs", hora: "15:30" },
+      { nombre: "Prop11Luis", id: "ejyANgP49Ag", hora: "16:00" },
+      { nombre: "Prop1Vannesa", id: "D1V8ByXxOBY", hora: "16:30" },
+      { nombre: "PE1Luis", id: "lypfUva-WWs", hora: "17:00" }
+    ];
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDbFvZMgoIvN_1Hp_7l-WJ4dLvWI0GQi_I",
+      authDomain: "radionoble-a040c.firebaseapp.com",
+      databaseURL: "https://radionoble-a040c-default-rtdb.firebaseio.com",
+      projectId: "radionoble-a040c",
+      storageBucket: "radionoble-a040c.firebasestorage.app",
+      messagingSenderId: "541307166879",
+      appId: "1:541307166879:web:34475c1d77f849e7afc2aa"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    var player;
+    var sedeSeleccionadaOriginal = "";
+    var sedeLimpia = "";
+    var cancionActualKey = null;
+    var rawColaData = null;
+    var ultimoAnuncioRegistrado = "";
+
+    function validarIngresoSede() {
+      var sede = document.getElementById("loginSede").value;
+      var pin = document.getElementById("loginPin").value;
+
+      if (PINS_SEDES[sede] === pin) {
+        sedeSeleccionadaOriginal = sede;
+        sedeLimpia = sede.replace(/[^a-zA-Z0-9]/g, "");
+        
+        document.getElementById("lblSedeTitulo").innerText = "📻 Radio Noble - " + sede.split(" ")[0];
+        document.getElementById("pantallaLogin").style.display = "none";
+        document.getElementById("interfazPrincipal").style.display = "block";
+        
+        iniciarEscuchasTiempoReal();
+        setInterval(revisarRelojPublicitario, 10000);
+      } else {
+        alert("🔒 PIN incorrecto.");
+      }
+    }
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: '250', width: '100%', videoId: '',
+        playerVars: { 'autoplay': 1, 'controls': 1, 'rel': 0, 'origin': window.location.origin },
+        events: { 'onStateChange': onPlayerStateChange, 'onError': onPlayerError }
+      });
+    }
+
+    function iniciarEscuchasTiempoReal() {
+      db.ref("colas/" + sedeLimpia).on("value", snapshot => {
+        rawColaData = snapshot.val();
+        renderColaMaster();
+      });
+
+      db.ref("usuarios").on("value", snapshot => {
+        renderAuditoriaMaster(snapshot.val());
+      });
+    }
+
+    function renderColaMaster() {
+      var tbody = document.getElementById("tablaCola");
+      tbody.innerHTML = "";
+      var contador = 0;
+      var sonandoAlgo = false;
+      var proximaTrack = null;
+
+      if (!rawColaData) {
+        document.getElementById("lblContador").innerText = "0 en espera";
+        ejecutarPilotoAutomatico(); return;
+      }
+
+      Object.keys(rawColaData).forEach(key => {
+        var item = rawColaData[key];
+        if (item.estado === "En espera" || item.estado === "Sonando") {
+          if (item.estado === "En espera") {
+            contador++; if (!proximaTrack) proximaTrack = { key: key, item: item };
+          }
+          if (item.estado === "Sonando") {
+            sonandoAlgo = true; cancionActualKey = key;
+            document.getElementById("lblTrack").innerText = "🔊 " + item.titulo;
+            if (player && typeof player.loadVideoById === 'function' && player.getVideoData && player.getVideoData().video_id !== item.id) {
+              player.loadVideoById(item.id, 0);
+            }
+          }
+
+          var tagEstilo = item.estado === "Sonando" ? "is-warning" : "is-link";
+          tbody.innerHTML += `<tr>
+            <td><strong class="has-text-white">${item.usuario}</strong></td>
+            <td>${item.titulo}</td>
+            <td><span class="has-text-grey-light">${item.hora}</span></td>
+            <td class="has-text-right">
+              <span class="tag ${tagEstilo} has-text-weight-bold" style="border-radius:4px;">${item.estado}</span>
+              <button class="button is-small is-danger ml-2 has-text-weight-bold" onclick="saltarTemaMaster('${key}')" style="border-radius:4px;">Saltar</button>
+            </td>
+          </tr>`;
+        }
+      });
+
+      document.getElementById("lblContador").innerText = contador + " en espera";
+      if (!sonandoAlgo && proximaTrack) {
+        db.ref("colas/" + sedeLimpia + "/" + proximaTrack.key).update({ estado: "Sonando" });
+      } else if (!sonandoAlgo && !proximaTrack) {
+        ejecutarPilotoAutomatico();
+      }
+    }
+
+    function renderAuditoriaMaster(usuarios) {
+      var tbody = document.getElementById("tablaAuditoria"); tbody.innerHTML = "";
+      var fechaHoy = new Date().toISOString().slice(0, 10);
+      if(!usuarios) return;
+
+      Object.keys(usuarios).forEach(uid => {
+        var u = usuarios[uid];
+        var pedidas = (u.fechas && u.fechas[fechaHoy]) ? u.fechas[fechaHoy] : 0;
+        var adj = u.ajustes_cuota || 0;
+        var disp = (20 + adj) - pedidas; if(disp < 0) disp = 0;
+
+        var banTag = u.baneado ? `<span class="tag is-danger has-text-weight-bold">⛔ SUSPENDIDO</span>` : `<span class="tag is-success has-text-weight-bold">🟢 CON ACCESO</span>`;
+
+        tbody.innerHTML += `<tr>
+          <td><strong class="has-text-white">${u.nombre || 'Colaborador'}</strong><br><small class="has-text-grey-light">${u.correo || ''}</small></td>
+          <td>Peticiones de hoy: <strong class="has-text-warning">${pedidas}</strong> | Libres: <strong class="has-text-success">${disp}</strong></td>
+          <td>${banTag}</td>
+          <td class="has-text-right">
+            <button class="button is-small is-dark" style="border:1px solid #444; color:#fff;" onclick="modificarCuotaMaster('${uid}', 1)">➕ 1</button>
+            <button class="button is-small is-dark ml-1" style="border:1px solid #444; color:#fff;" onclick="modificarCuotaMaster('${uid}', -1)">⚠️ -1</button>
+            <button class="button is-small is-danger ml-3 has-text-weight-bold" onclick="alternarBanMaster('${uid}', ${u.baneado ? false : true})">
+              ${u.baneado ? 'Restaurar' : 'Baneo (BAN)'}
+            </button>
+          </td>
+        </tr>`;
+      });
+    }
+
+    function onPlayerStateChange(event) {
+      if (event.data == YT.PlayerState.ENDED && cancionActualKey) {
+        db.ref("colas/" + sedeLimpia + "/" + cancionActualKey).update({ estado: "Finalizada" });
+        cancionActualKey = null;
+      }
+    }
+    function onPlayerError(event) {
+      if (cancionActualKey) {
+        db.ref("colas/" + sedeLimpia + "/" + cancionActualKey).update({ estado: "Saltada (Error)" });
+        cancionActualKey = null;
+      }
+    }
+    function saltarTemaMaster(key) {
+      if(confirm("¿Saltar el tema seleccionado?")) {
+        db.ref("colas/" + sedeLimpia + "/" + key).update({ estado: "Saltada" });
+        if(key === cancionActualKey && player && typeof player.stopVideo === 'function') { player.stopVideo(); cancionActualKey = null; }
+      }
+    }
+    function modificarCuotaMaster(uid, v) {
+      db.ref("usuarios/" + uid + "/ajustes_cuota").transaction(a => (a || 0) + v);
+    }
+    function alternarBanMaster(uid, est) {
+      db.ref("usuarios/" + uid + "/baneado").set(est);
+    }
+
+    function revisarRelojPublicitario() {
+      var ahora = new Date(); var dia = ahora.getDay();
+      if (dia >= 1 && dia <= 5) {
+        var hStr = ahora.toTimeString().slice(0, 5); var fStr = ahora.toISOString().slice(0, 10);
+        var pauta = CRONOGRAMA_ANUNCIOS.find(p => p.hora === hStr);
+        if (pauta && ultimoAnuncioRegistrado !== (pauta.nombre + "_" + fStr)) {
+          ultimoAnuncioRegistrado = pauta.nombre + "_" + fStr;
+          TODAS_LAS_RAMAS_SEDES.forEach(rama => {
+            db.ref("colas/" + rama).push({
+              usuario: "📢 ANUNCIO INSTITUCIONAL", titulo: "Pauta Obligatoria: " + pauta.nombre, id: pauta.id, hora: pauta.hora, estado: "En espera"
+            });
+          });
+        }
+      }
+    }
+
+    function ejecutarPilotoAutomatico() {
+      db.ref("artistas_del_dia/" + sedeLimpia).once("value", snap => {
+        var art = snap.val(); var artElegido = "Feid";
+        if (art) { var k = Object.keys(art); artElegido = art[k[Math.floor(Math.random() * k.length)]]; }
+
+        var q = artElegido + " éxitos mix";
+        var cbName = "ytA_" + Math.floor(Math.random() * 100000);
+        window[cbName] = function(data) {
+          document.getElementById(cbName).remove(); delete window[cbName];
+          if (data && data[1] && data[1][0]) {
+            var proxy = "https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=none&url=" + encodeURIComponent("https://www.youtube.com/results?search_query=" + encodeURIComponent(data[1][0]));
+            fetch(proxy).then(r => r.text()).then(html => {
+              var match = html.match(/\/vi\/([a-zA-Z0-9_-]{11})\//);
+              db.ref("colas/" + sedeLimpia).push({
+                usuario: "🤖 PILOTO AUTOMÁTICO", titulo: "Éxito Recomendado (" + artElegido + ")", id: match ? match[1] : "kJQP7kiw5Fk", hora: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), estado: "En espera"
+              });
+            });
+          }
+        };
+        var s = document.createElement('script'); s.id = cbName; s.src = "https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&q=" + encodeURIComponent(q) + "&callback=" + cbName; document.body.appendChild(s);
+      });
+    }
+  </script>
+</body>
+</html>
