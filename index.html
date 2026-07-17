@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radio Noble - Solicitar Canción</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap');
+    
+    body { 
+      background-color: #0d0d0d; 
+      color: #fff; 
+      font-family: 'Montserrat', sans-serif;
+      min-height: 100vh; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 20px;
+      position: relative;
+    }
+
+    /* 🌈 DEGRADADO CROMÁTICO DE TU RUEDA DE COLOR */
+    .borde-cromatico {
+      background: linear-gradient(#141414, #141414) padding-box,
+                  linear-gradient(135deg, #fcd303, #47b85d, #307ebf, #683bb5, #b82375, #d12828, #f27424) border-box;
+      border: 2px solid transparent;
+    }
+
+    .widget-sonando {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #141414;
+      border-radius: 14px;
+      padding: 12px 20px;
+      display: none; 
+      align-items: center;
+      gap: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+      z-index: 100;
+      max-width: 340px;
+    }
+
+    .widget-sonando .icon-disc {
+      width: 42px;
+      height: 42px;
+      background-color: #222;
+      background-size: cover;
+      background-position: center;
+      border: 2px dashed #fcd303;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: spin 4s linear infinite;
+      flex-shrink: 0;
+      transition: border-style 0.3s ease;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    .contenedor-premium {
+      border-radius: 20px;
+      padding: 40px 35px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+    }
+
+    .logo-noble-img {
+      display: block;
+      max-height: 75px;
+      width: auto;
+      margin: 0 auto 15px auto;
+    }
+
+    .title-app {
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .wrapper-login-degradado {
+      background: linear-gradient(rgba(10, 10, 10, 0.88), rgba(10, 10, 10, 0.88)) padding-box,
+                  linear-gradient(135deg, #fcd303, #47b85d, #307ebf, #683bb5, #b82375, #d12828, #f27424) border-box;
+      border: 1px solid transparent;
+      padding: 35px 25px;
+      border-radius: 16px;
+      margin-top: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .btn-liquid-glass, .select-liquid-glass select {
+      background: rgba(255, 255, 255, 0.06) !important;
+      backdrop-filter: blur(12px) saturate(160%);
+      -webkit-backdrop-filter: blur(12px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      color: #ffffff !important;
+      font-weight: 600;
+      border-radius: 27px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+      transition: all 0.3s ease;
+    }
+    .select-liquid-glass select { height: 48px; border-radius: 10px !important; }
+    .select-liquid-glass select option { background-color: #141414; color: #fff; }
+    .btn-liquid-glass:hover {
+      background: rgba(255, 255, 255, 0.15) !important;
+      border-color: rgba(255, 255, 255, 0.35) !important;
+      transform: translateY(-2px);
+    }
+
+    .modal-card {
+      background: linear-gradient(#141414, #141414) padding-box,
+                  linear-gradient(135deg, #fcd303, #47b85d, #307ebf, #683bb5, #b82375, #d12828, #f27424) border-box;
+      border: 2px solid transparent;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .modal-card-head { background-color: #111 !important; border-bottom: 1px solid #222 !important; }
+    .modal-card-title { color: #fff !important; font-weight: 800; font-size: 1.1rem; }
+    .modal-card-body { background-color: #141414 !important; color: #ccc !important; font-size: 0.9rem; line-height: 1.6; }
+    .modal-card-foot { background-color: #111 !important; border-top: 1px solid #222 !important; justify-content: flex-end; gap: 10px;}
+    
+    .scroll-terminos {
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 10px;
+      border: 1px solid #222;
+      border-radius: 8px;
+      background: #0d0d0d;
+      padding: 15px;
+    }
+
+    .box-user-profile {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      padding: 12px 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+    
+    /* 🖼️ FOTO REAL DE GOOGLE EN EL PERFIL */
+    .avatar-google-real {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-size: cover;
+      background-position: center;
+      background-color: #307ebf;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      flex-shrink: 0;
+      border: 1px solid #444;
+    }
+
+    .label { color: #8c8c8c !important; font-size: 0.85rem !important; font-weight: 600 !important; margin-bottom: 0.3em !important; }
+    .input, .select select { 
+      background-color: #1a1a1a !important; 
+      color: #fff !important; 
+      border: 1px solid #2a2a2a !important; 
+      border-radius: 8px !important;
+      height: 44px;
+    }
+    .input:focus { border-color: #444 !important; box-shadow: none !important; }
+    .input::placeholder { color: #444; }
+    .control.has-icons-left .icon { color: #555 !important; height: 44px; }
+    
+    .checkbox:hover { color: #fff !important; }
+
+    .btn-degradado {
+      background: linear-gradient(90deg, #fcd303, #47b85d, #307ebf, #683bb5, #b82375, #d12828, #f27424);
+      border: none; color: #fff; font-weight: 600; height: 50px; border-radius: 25px; transition: transform 0.2s;
+    }
+    .btn-degradado:hover { color: #fff; transform: scale(1.02); }
+  </style>
+</head>
+<body>
+
+  <!-- WIDGET FLOTANTE SUPERIOR CON NOMBRE DE LA SEDE DINÁMICO -->
+  <div class="widget-sonando borde-cromatico" id="recuadroWidgetFlotante">
+    <div class="icon-disc" id="imgDiscoCover">
+      <i class="fa-solid fa-compact-disc" id="fallbackDiscoIcon" style="color: #fcd303; font-size: 1.2rem;"></i>
+    </div>
+    <div style="overflow: hidden;">
+      <p style="font-size: 0.65rem; color: #fcd303; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin: 0;" id="lblTextoSonandoEnSede">Sonando Ahora</p>
+      <p id="widget-titulo-cancion" style="font-size: 0.85rem; font-weight: 600; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Esperando...</p>
+      <p style="font-size: 0.7rem; color: #666; margin: 0;">Radio Noble</p>
+    </div>
+  </div>
+
+  <!-- TARJETA PRINCIPAL DEL ECOSISTEMA -->
+  <div class="contenedor-premium borde-cromatico">
+    <div class="has-text-centered mb-5">
+      <img src="logo.png" alt="Radio Noble" class="logo-noble-img" onerror="this.style.display='none'">
+      <h1 class="title is-4 title-app has-text-white mb-1">Radio Noble</h1>
+      <p class="is-size-7" style="color: #666;">Sintonizando directo en los parlantes de la sede</p>
+    </div>
+
+    <!-- PANTALLA 1: LOGIN -->
+    <div id="pantalla-login" class="wrapper-login-degradado">
+      <p class="is-size-6 mb-5 has-text-centered has-text-weight-semibold" style="color: #e0e0e0; letter-spacing: 0.5px;">Autenticación Corporativa</p>
+      <button class="button is-fullwidth btn-liquid-glass" style="height: 54px;" onclick="loginConGoogle()">
+        <span class="icon"><i class="fab fa-google"></i></span>
+        <span>Ingresar con Google</span>
+      </button>
+    </div>
+
+    <!-- PANTALLA 2: VINCULACIÓN DE SEDE Y TÉRMINOS OBLIGATORIOS -->
+    <div id="pantalla-registro-sede" style="display: none;">
+      <div class="wrapper-login-degradado">
+        <p class="is-size-6 mb-4 has-text-centered has-text-weight-semibold" style="color: #fcd303;">Configuración Inicial de Cuenta</p>
+        
+        <div class="field mb-5">
+          <label class="label">Asigna tu Sede Permanente *</label>
+          <div class="control">
+            <div class="select is-fullwidth select-liquid-glass">
+              <select id="regSede">
+                <option value="Valentía (Frontino)">Valentía (Frontino)</option>
+                <option value="Unión Noble (Central)">Unión Noble (Central)</option>
+                <option value="Convicción (MVPS)">Convicción (MVPS)</option>
+                <option value="Confianza (Fresno)">Confianza (Fresno)</option>
+                <option value="Corazon Noble (Guayabal)">Corazon Noble (Guayabal)</option>
+                <option value="Cortesía (San Pedro)">Cortesía (San Pedro)</option>
+                <option value="Evolución (Promisión)">Evolución (Promisión)</option>
+                <option value="Familia (Hato)">Familia (Hato)</option>
+                <option value="Fortaleza (Girardota)">Fortaleza (Girardota)</option>
+                <option value="Lealtad (Platino)">Lealtad (Platino)</option>
+                <option value="Perseverancia (Ciudadela)">Perseverancia (Ciudadela)</option>
+                <option value="Propósito (La Victoria)">Propósito (La Victoria)</option>
+                <option value="Resiliencia (Manizales)">Resiliencia (Manizales)</option>
+                <option value="Transformación (Delta)">Transformación (Delta)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="field mb-5">
+          <div class="control">
+            <label class="checkbox" style="color: #aaa; font-size: 0.85rem;" onclick="abrirModalTerminos(event)">
+              <input type="checkbox" id="checkTerminos" disabled style="margin-right: 8px;">
+              Acepto los <strong style="color: #fcd303; text-decoration: underline; cursor: pointer;">Términos y Condiciones</strong>
+            </label>
+          </div>
+        </div>
+
+        <button class="button is-fullwidth btn-degradado" id="btnIrAlFormulario" disabled onclick="guardarSedeYTerminos()">
+          <span>Vamos a RADIO NOBLE</span>
+          <span class="icon"><i class="fa-solid fa-arrow-right"></i></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- PANTALLA 3: FORMULARIO DE SOLICITUDES PREMIUM -->
+    <div id="pantalla-formulario" style="display: none;">
+      <div class="box-user-profile">
+        <!-- CONTENEDOR DE LA PORTADA FOTO REAL DE GOOGLE -->
+        <div class="avatar-google-real" id="user-avatar-letra-o-foto">U</div>
+        <div style="line-height: 1.2; overflow: hidden; width: 100%;">
+          <p id="lbl-nombre-user" style="font-size: 0.85rem; font-weight: 600; text-transform: lowercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">usuario</p>
+          <p style="font-size: 0.7rem; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><span id="lbl-sede-fija" class="has-text-warning">Sede</span> | <span id="lbl-correo-user">correo</span></p>
+        </div>
+        <div class="ml-auto has-text-right" style="flex-shrink:0;">
+          <span class="tag is-dark" id="lbl-cuota-user" style="border: 1px solid #333; color: #fcd303; font-weight: 600;">20 disp.</span>
+        </div>
+      </div>
+
+      <form id="formPeticion" onsubmit="enviarPeticion(event)">
+        <div class="field mb-4">
+          <label class="label">Consecutivo de Puesto *</label>
+          <div class="control has-icons-left">
+            <input class="input" type="text" id="txtPuesto" placeholder="Ej: B-12 o Modulo 4" required>
+            <div class="icon is-small is-left"><i class="fa-solid fa-desktop"></i></div>
+          </div>
+        </div>
+
+        <div class="field mb-4">
+          <label class="label">Nombre del Artista / Grupo *</label>
+          <div class="control has-icons-left">
+            <input class="input" type="text" id="txtArtista" placeholder="Ej: Feid, Carin Leon" required>
+            <div class="icon is-small is-left"><i class="fa-solid fa-users"></i></div>
+          </div>
+        </div>
+
+        <div class="field mb-5">
+          <label class="label">Título de la Canción *</label>
+          <div class="control has-icons-left">
+            <input class="input" type="text" id="txtCancion" placeholder="Ej: Luna" required>
+            <div class="icon is-small is-left"><i class="fa-solid fa-music"></i></div>
+          </div>
+        </div>
+
+        <button class="button is-fullwidth btn-degradado" id="btnEnviar" type="submit">
+          <span class="icon"><i class="fa-solid fa-paper-plane"></i></span>
+          <span>Enviar mi Canción</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DE TÉRMINOS Y CONDICIONES (LIQUID GLASS FLOATING) -->
+  <div class="modal" id="modalTerminos">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">📜 Lineamientos del Canal</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="scroll-terminos" id="cajaScroll" onscroll="detectarLecturaScroll()">
+          <h4 class="has-text-white has-text-weight-bold mb-3">Bienvenido a Radio Noble Corporativa.</h4>
+          <p class="mb-3">Al hacer uso de este canal de entretenimiento de fondo, aceptas cumplir de manera estricta los siguientes lineamientos internos y políticas de tratamiento de datos:</p>
+          
+          <p class="mb-3"><strong>1. Propósito del Canal:</strong> Radio Noble es una herramienta exclusiva para la dinamización de los ambientes laborales en las diferentes sedes físicas. Queda estrictamente prohibido utilizar el formulario de solicitudes para enviar mensajes ofensivos, de carácter político o inapropiados, lo cual sera tratado bajo la matriz de sanciones de la organizacion.</p>
+          
+          <p class="mb-3"><strong>2. Gestión de Cuotas e Identidad:</strong> Cada colaborador cuenta con un cupo diario máximo de 20 canciones asignadas vinculadas a su identidad digital corporativa. Los intentos de suplantación, alteración de datos de puesto o uso malintencionado de cuentas ajenas acarrearán la suspensión directa del servicio a través del módulo de auditoría local.</p>
+          
+          <p class="mb-3"><strong>3. Tratamiento de Datos:</strong> Al registrar tu sede, autorizas el almacenamiento técnico interno de tu correo electrónico, puesto e historial de programación con fines analíticos y de control de baneo corporativo. Ningún dato será transmitido a dependencias externas ajenas a la organización.</p>
+        </div>
+      </section>
+      <footer class="modal-card-head" style="justify-content: flex-end; gap: 10px;">
+        <button class="button is-light" onclick="cerrarModalTerminos(false)">Cancelar</button>
+        <button class="button is-warning has-text-weight-bold" id="btnAceptarModal" disabled onclick="cerrarModalTerminos(true)">Acepto términos y condiciones</button>
+      </footer>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDbFvZMgoIvN_1Hp_7l-WJ4dLvWI0GQi_I",
+      authDomain: "radionoble-a040c.firebaseapp.com",
+      databaseURL: "https://radionoble-a040c-default-rtdb.firebaseio.com",
+      projectId: "radionoble-a040c",
+      storageBucket: "radionoble-a040c.firebasestorage.app",
+      messagingSenderId: "541307166879",
+      appId: "1:541307166879:web:34475c1d77f849e7afc2aa"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const auth = firebase.auth();
+
+    var usuarioActual = null;
+    var solicitudesHoy = 0;
+    var maxPermitidas = 20;
+    var estaBaneado = false;
+    var refEscuchaWidget = null;
+    var sedeAsignadaFija = "";
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        usuarioActual = user;
+        verificarPerfilUsuarioEnFirebase();
+      } else {
+        cambiarPantallaVisible("pantalla-login");
+        document.getElementById("recuadroWidgetFlotante").style.display = "none";
+      }
+    });
+
+    function loginConGoogle() {
+      var provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(e => alert("Error: " + e.message));
+    }
+
+    function verificarPerfilUsuarioEnFirebase() {
+      db.ref("usuarios/" + usuarioActual.uid).once("value", snapshot => {
+        var data = snapshot.val();
+        if (data && data.sedeFija) {
+          sedeAsignadaFija = data.sedeFija;
+          activarInterfazFormularioPrincipal();
+        } else {
+          cambiarPantallaVisible("pantalla-registro-sede");
+        }
+      });
+    }
+
+    function cambiarPantallaVisible(idPantalla) {
+      document.getElementById("pantalla-login").style.display = "none";
+      document.getElementById("pantalla-registro-sede").style.display = "none";
+      document.getElementById("pantalla-formulario").style.display = "none";
+      document.getElementById(idPantalla).style.display = "block";
+    }
+
+    function abrirModalTerminos(event) {
+      event.preventDefault(); 
+      document.getElementById("modalTerminos").classList.add("is-active");
+      document.getElementById("cajaScroll").scrollTop = 0;
+      document.getElementById("btnAceptarModal").disabled = true; 
+    }
+
+    function detectarLecturaScroll() {
+      var caja = document.getElementById("cajaScroll");
+      if (caja.scrollHeight - caja.scrollTop <= caja.clientHeight + 5) {
+        document.getElementById("btnAceptarModal").disabled = false;
+      }
+    }
+
+    function cerrarModalTerminos(aceptado) {
+      document.getElementById("modalTerminos").classList.remove("is-active");
+      if (aceptado) {
+        document.getElementById("checkTerminos").checked = true;
+        document.getElementById("btnIrAlFormulario").disabled = false; 
+      } else {
+        document.getElementById("checkTerminos").checked = false;
+        document.getElementById("btnIrAlFormulario").disabled = true;
+      }
+    }
+
+    function guardarSedeYTerminos() {
+      var sedeElegida = document.getElementById("regSede").value;
+      var nombreLimpio = usuarioActual.displayName ? usuarioActual.displayName : usuarioActual.email.split('@')[0];
+      
+      db.ref("usuarios/" + usuarioActual.uid).update({
+        nombre: nombreLimpio,
+        correo: usuarioActual.email,
+        sedeFija: sedeElegida,
+        terminosAceptados: true,
+        fechaRegistro: new Date().toLocaleString()
+      }, function(error) {
+        if (!error) {
+          sedeAsignadaFija = sedeElegida;
+          activarInterfazFormularioPrincipal();
+        } else {
+          alert("Error de guardado.");
+        }
+      });
+    }
+
+    function activarInterfazFormularioPrincipal() {
+      cambiarPantallaVisible("pantalla-formulario");
+      document.getElementById("recuadroWidgetFlotante").style.display = "flex";
+
+      // 🎯 MODIFICACIÓN: RENDERIZADO DINÁMICO DE LA SEDE ASIGNADA EN EL TOCADISCOS
+      document.getElementById("lblTextoSonandoEnSede").innerText = "Sonando Ahora en " + sedeAsignadaFija.split(" ")[0].toUpperCase();
+
+      var nombreLimpio = usuarioActual.displayName ? usuarioActual.displayName.toLowerCase() : usuarioActual.email.split('@')[0];
+      document.getElementById("lbl-nombre-user").innerText = nombreLimpio;
+      document.getElementById("lbl-correo-user").innerText = usuarioActual.email;
+      document.getElementById("lbl-sede-fija").innerText = sedeAsignadaFija;
+
+      // 🎯 MODIFICACIÓN: CARGAR LA FOTO REAL DEL PERFIL DE GOOGLE
+      var boxAvatar = document.getElementById("user-avatar-letra-o-foto");
+      if(usuarioActual.photoURL) {
+        boxAvatar.innerText = "";
+        boxAvatar.style.backgroundImage = "url('" + usuarioActual.photoURL + "')";
+      } else {
+        boxAvatar.innerText = nombreLimpio.charAt(0).toUpperCase();
+        boxAvatar.style.backgroundImage = "none";
+      }
+
+      escucharCuotasYEstado();
+      cambiarSedeEscuchaWidget();
+    }
+
+    function escucharCuotasYEstado() {
+      var uidLimpio = usuarioActual.uid;
+      var fechaHoy = new Date().toISOString().slice(0, 10);
+
+      db.ref("usuarios/" + uidLimpio).on("value", snapshot => {
+        var data = snapshot.val();
+        estaBaneado = data && data.baneado ? true : false;
+        
+        var conteo = (data && data.fechas && data.fechas[fechaHoy]) ? data.fechas[fechaHoy] : 0;
+        var ajustes = (data && data.ajustes_cuota) ? data.ajustes_cuota : 0;
+        
+        solicitudesHoy = conteo;
+        maxPermitidas = 20 + ajustes;
+        if(maxPermitidas < 0) maxPermitidas = 0;
+
+        var disponibles = maxPermitidas - solicitudesHoy;
+        if(disponibles < 0) disponibles = 0;
+
+        document.getElementById("lbl-cuota-user").innerText = disponibles + " disp.";
+        if(estaBaneado) {
+          document.getElementById("lbl-cuota-user").className = "tag is-danger";
+          document.getElementById("lbl-cuota-user").innerText = "⛔ BANEADO";
+        }
+      });
+    }
+
+    function cambiarSedeEscuchaWidget() {
+      var ramaSede = sedeAsignadaFija.replace(/[^a-zA-Z0-9]/g, "");
+      if (refEscuchaWidget) refEscuchaWidget.off();
+
+      refEscuchaWidget = db.ref("colas/" + ramaSede);
+      refEscuchaWidget.on("value", snapshot => {
+        var data = snapshot.val();
+        var tituloDetectado = "Esperando...";
+        var idVideoDetectado = null;
+        
+        if (data) {
+          Object.values(data).forEach(item => {
+            if (item.estado === "Sonando") {
+              tituloDetectado = item.titulo; idVideoDetectado = item.id;
+            }
+          });
+        }
+        
+        document.getElementById("widget-titulo-cancion").innerText = tituloDetectado;
+        var discElement = document.getElementById("imgDiscoCover");
+        var iconElement = document.getElementById("fallbackDiscoIcon");
+        
+        if(idVideoDetectado) {
+          discElement.style.backgroundImage = "url('https://img.youtube.com/vi/" + idVideoDetectado + "/mqdefault.jpg')";
+          discElement.style.borderStyle = "solid"; iconElement.style.display = "none";
+        } else {
+          discElement.style.backgroundImage = "none";
+          discElement.style.borderStyle = "dashed"; iconElement.style.display = "block";
+        }
+      });
+    }
+
+    // ⚡ MOTOR AUTOMATIZADO CON FILTRADO OFICIAL DE DISQUERAS (TUMBA DESPACITO U OTROS CRUCES)
+    function buscarIdEnYouTube(track) {
+      return new Promise((resolve) => {
+        // Añadimos tags restrictivas para evitar cruces extraños con tracks comerciales pesados
+        var query = track + " official audio video";
+        var cbName = "ytClient_" + Math.floor(Math.random() * 100000);
+        window[cbName] = function(data) {
+          document.getElementById(cbName).remove(); delete window[cbName];
+          if (data && data[1] && data[1][0]) {
+            var urlProxy = "https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=none&url=" + encodeURIComponent("https://www.youtube.com/results?search_query=" + encodeURIComponent(data[1][0]));
+            fetch(urlProxy).then(r => r.text()).then(html => {
+              var match = html.match(/\/vi\/([a-zA-Z0-9_-]{11})\//);
+              resolve(match ? match[1] : "kJQP7kiw5Fk");
+            }).catch(() => resolve("kJQP7kiw5Fk"));
+          } else { resolve("kJQP7kiw5Fk"); }
+        };
+        var script = document.createElement('script'); script.id = cbName;
+        script.src = "https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&q=" + encodeURIComponent(query) + "&callback=" + cbName;
+        document.body.appendChild(script);
+      });
+    }
+
+    async function enviarPeticion(event) {
+      event.preventDefault();
+      if(estaBaneado) return alert("Tu usuario se encuentra suspendido de la radio.");
+      if(solicitudesHoy >= maxPermitidas) return alert("Has agotado tus 20 canciones permitidas para hoy.");
+
+      var btn = document.getElementById("btnEnviar");
+      btn.classList.add("is-loading");
+
+      var puesto = document.getElementById("txtPuesto").value.trim();
+      var artista = document.getElementById("txtArtista").value.trim();
+      var cancion = document.getElementById("txtCancion").value.trim();
+      var tituloCompleto = artista + " - " + cancion;
+
+      var videoId = await buscarIdEnYouTube(tituloCompleto);
+      var ramaSede = sedeAsignadaFija.replace(/[^a-zA-Z0-9]/g, "");
+      var fechaHoy = new Date().toISOString().slice(0, 10);
+      var nombreMostrar = usuarioActual.displayName ? usuarioActual.displayName : usuarioActual.email.split('@')[0];
+
+      db.ref("colas/" + ramaSede).push({
+        usuario: nombreMostrar + " (" + puesto + ")",
+        correo: usuarioActual.email, uid: usuarioActual.uid,
+        titulo: tituloCompleto, artista: artista, id: videoId,
+        hora: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        estado: "En espera"
+      }, function(error) {
+        btn.classList.remove("is-loading");
+        if (error) { alert("Error de conexión."); } else {
+          db.ref("usuarios/" + usuarioActual.uid + "/fechas/" + fechaHoy).set(solicitudesHoy + 1);
+          db.ref("artistas_del_dia/" + ramaSede + "/" + artista.toLowerCase().replace(/[^a-z0-9]/g, "")).set(artista);
+          alert("¡Tema enviado con éxito!");
+          document.getElementById("txtCancion").value = ""; document.getElementById("txtArtista").value = "";
+        }
+      });
+    }
+  </script>
+</body>
+</html>
