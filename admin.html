@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radio Noble - Panel de Administración Master AI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap');
+    body { background-color: #0d0d0d; color: #fff; font-family: 'Montserrat', sans-serif; padding: 30px 20px; min-height: 100vh; }
+    .box-login-admin { max-width: 450px; margin: 80px auto; background: linear-gradient(rgba(10, 10, 10, 0.88), rgba(10, 10, 10, 0.88)) padding-box, linear-gradient(135deg, #fcd303, #47b85d, #307ebf, #683bb5, #b82375, #d12828, #f27424) border-box; border: 1.5px solid transparent; padding: 40px 35px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.7); }
+    .card-premium-admin { background: linear-gradient(#141414, #141414) padding-box, linear-gradient(135deg, #fcd303, #47b85d, #307ebf, #683bb5, #b82375, #d12828, #f27424) border-box; border: 1.5px solid transparent; border-radius: 16px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 30px; }
+    .contenedor-scroll-cola { max-height: 330px; overflow-y: auto; border-radius: 8px; background: #181818; border: 1px solid #252525; }
+    .table { background: #181818 !important; color: #ffffff !important; width: 100% !important; margin-bottom: 0 !important; }
+    .table th { color: #8c8c8c !important; background-color: #111111 !important; position: sticky; top: 0; z-index: 10; font-weight: 700; border-bottom: 2px solid #222 !important; font-size: 0.8rem; text-transform: uppercase;} 
+    .table td { color: #e0e0e0 !important; background-color: #181818 !important; vertical-align: middle; border-bottom: 1px solid #222 !important; font-size: 0.85rem; padding: 12px 15px;}
+    .input, .select select { background-color: #181818 !important; color: #fff !important; border: 1px solid #2a2a2a !important; height: 44px;}
+    .btn-master { background: linear-gradient(90deg, #fcd303, #47b85d, #307ebf, #683bb5, #b82375, #d12828, #f27424); border: none; color: #fff; font-weight: 600; border-radius: 20px; }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN DE ACCESO -->
+  <div id="pantallaLogin" class="box-login-admin">
+    <h2 class="title is-4 has-text-white has-text-centered mb-5" style="font-weight:800;">🔑 PANEL MASTER AI</h2>
+    <div class="field mt-4"><label class="label">Selecciona la Sede:</label>
+      <div class="control"><div class="select is-fullwidth"><select id="loginSede">
+        <option value="Valentía (Frontino)">Valentía (Frontino)</option><option value="Unión Noble (Central)">Unión Noble (Central)</option><option value="Convicción (MVPS)">Convicción (MVPS)</option><option value="Confianza (Fresno)">Confianza (Fresno)</option><option value="Corazon Noble (Guayabal)">Corazon Noble (Guayabal)</option><option value="Cortesía (San Pedro)">Cortesía (San Pedro)</option><option value="Evolución (Promisión)">Evolución (Promisión)</option><option value="Familia (Hato)">Familia (Hato)</option><option value="Fortaleza (Girardota)">Fortaleza (Girardota)</option><option value="Lealtad (Platino)">Lealtad (Platino)</option><option value="Perseverancia (Ciudadela)">Perseverancia (Ciudadela)</option><option value="Propósito (La Victoria)">Propósito (La Victoria)</option><option value="Resiliencia (Manizales)">Resiliencia (Manizales)</option><option value="Transformación (Delta)">Transformación (Delta)</option>
+      </select></div></div>
+    </div>
+    <div class="field mb-5"><label class="label">PIN de Seguridad Sede:</label><input class="input" type="password" id="loginPin" placeholder="****" maxlength="4" style="text-align:center;"></div>
+    <button class="button is-fullwidth btn-master" style="height:46px;" onclick="validarIngresoSede()">Acceder al Monitoreo</button>
+  </div>
+
+  <!-- INTERFAZ DE CONTROL PRINCIPAL -->
+  <div id="interfazPrincipal" style="display: none;">
+    <div class="container is-fluid">
+      <div class="columns">
+        
+        <!-- MONITOR REPRODUCTOR -->
+        <div class="column is-4">
+          <div class="card-premium-admin">
+            <h2 class="title is-5 has-text-white mb-4" id="lblSedeTitulo" style="font-weight:800; text-transform:uppercase;">📺 Canal Radio</h2>
+            <div id="contenedorPlayerHTML5" style="width: 100%; height: 250px; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #222;"></div>
+            <p class="is-size-7 has-text-centered mt-3" id="lblTrack" style="color:#8c8c8c; font-weight:600;">Sincronizando...</p>
+          </div>
+        </div>
+        
+        <!-- COLA LOCAL DE TRANSMISION -->
+        <div class="column is-8">
+          <div class="card-premium-admin">
+            <div class="level mb-4"><div class="level-left"><h2 class="title is-5 has-text-white" style="font-weight:800;">📋 Cola de Transmisión Sede</h2></div><div class="level-right"><span class="tag is-dark" id="lblContador" style="color:#fcd303;">0 en espera</span></div></div>
+            <div class="contenedor-scroll-cola"><table class="table is-fullwidth"><thead><tr><th>Solicitante</th><th>Canción / Artista</th><th>Hora</th><th class="has-text-right">Estado / Acción</th></tr></thead><tbody id="tablaCola"></tbody></table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AUDITORÍA FILTRADA POR REGION -->
+      <div class="card-premium-admin">
+        <h2 class="title is-5 has-text-white mb-4" style="font-weight:800;">📊 Gestión de Colaboradores y Cuotas Diarias</h2>
+        <div class="contenedor-scroll-cola" style="max-height: 380px;"><table class="table is-fullwidth"><thead><tr><th>Colaborador Identificado</th><th>Uso Diario</th><th>Estado del Perfil</th><th class="has-text-right">Acciones de Control</th></tr></thead><tbody id="tablaAuditoria"></tbody></table></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <script>
+    const PINS_SEDES = { "Valentía (Frontino)": "1010", "Unión Noble (Central)": "2020", "Convicción (MVPS)": "3030", "Confianza (Fresno)": "4040", "Corazon Noble (Guayabal)": "5050", "Cortesía (San Pedro)": "6060", "Evolución (Promisión)": "7070", "Familia (Hato)": "8080", "Fortaleza (Girardota)": "9090", "Lealtad (Platino)": "1111", "Perseverancia (Ciudadela)": "2222", "Propósito (La Victoria)": "3333", "Resiliencia (Manizales)": "4444", "Transformación (Delta)": "5555" };
+    const firebaseConfig = { apiKey: "AIzaSyDbFvZMgoIvN_1Hp_7l-WJ4dLvWI0GQi_I", authDomain: "radionoble-a040c.firebaseapp.com", databaseURL: "https://radionoble-a040c-default-rtdb.firebaseio.com", projectId: "radionoble-a040c" };
+    
+    firebase.initializeApp(firebaseConfig); const db = firebase.database();
+    var sedeSeleccionadaOriginal = "", sedeLimpia = "", cancionActualKey = null, rawColaData = null, idUltimoVideoCargado = "";
+
+    // 🔑 INYECCIÓN DE TU API KEY DE GEMINI COMPATIBLE
+    const GEMINI_API_KEY = "AQ.Ab8RN6IsOUdya9pMTxd06rw3TakB6DSAH7-_aEQGi9ets9aqFw";
+
+    function validarIngresoSede() {
+      var s = document.getElementById("loginSede").value; var p = document.getElementById("loginPin").value;
+      if (PINS_SEDES[s] === p) {
+        sedeSeleccionadaOriginal = s; sedeLimpia = s.replace(/[^a-zA-Z0-9]/g, "");
+        document.getElementById("lblSedeTitulo").innerText = "📻 Radio Noble - " + s.split(" ")[0];
+        document.getElementById("pantallaLogin").style.display = "none"; document.getElementById("interfazPrincipal").style.display = "block";
+        iniciarEscuchasTiempoReal();
+      } else { alert("🔒 PIN incorrecto."); }
+    }
+
+    function iniciarEscuchasTiempoReal() {
+      db.ref("colas/" + sedeLimpia).on("value", snapshot => { rawColaData = snapshot.val(); renderColaMaster(); });
+      db.ref("usuarios").on("value", snapshot => { renderAuditoriaMaster(snapshot.val()); });
+    }
+
+    // 🧠 MOTOR DE INTELIGENCIA ARTIFICIAL GEMINI DIRECTO NATIVO
+    function ejecutarBusquedaProxyMaster(key, titulo) {
+      // El prompt entrena a Gemini para que actúe como un extractor puro de IDs de YouTube sin textos adicionales
+      var promptIA = `Actúa como un buscador musical de YouTube experto. Encuentra el ID de 11 caracteres del video de YouTube más limpio y reproducible con la letra o lyrics de la canción: "${titulo}". Responde ÚNICAMENTE con los 11 caracteres del id del video (ejemplo: eP6_MvG3v_w), no agregues saludos, explicaciones ni formato markdown, solo el ID plano de 11 caracteres. Si es imposible encontrarlo pon: 56yU3R_3VjE`;
+
+      var urlGemini = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY;
+
+      fetch(urlGemini, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [{ text: promptIA }] }] })
+      })
+      .then(res => res.json())
+      .then(data => {
+        var idExtraido = "56yU3R_3VjE";
+        if(data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+          idExtraido = data.candidates[0].content.parts[0].text.trim().replace(/[^a-zA-Z0-9_-]/g, "");
+          // Si por error la IA devuelve un texto largo en vez de un ID de 11 caracteres, aplicamos descarte de seguridad
+          if(idExtraido.length !== 11) idExtraido = "56yU3R_3VjE";
+        }
+        db.ref("colas/" + sedeLimpia + "/" + key).update({ id: idExtraido, estado: "En espera" });
+      })
+      .catch(() => {
+        // Fallback de contingencia automático
+        db.ref("colas/" + sedeLimpia + "/" + key).update({ id: "56yU3R_3VjE", estado: "En espera" });
+      });
+    }
+
+    function forzarCargaIframeHTML5(videoId) {
+      if (idUltimoVideoCargado === videoId || videoId === "PENDIENTE") return;
+      idUltimoVideoCargado = videoId;
+      document.getElementById("contenedorPlayerHTML5").innerHTML = `<iframe style="width:100%; height:100%; border:none;" src="https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    }
+
+    function renderColaMaster() {
+      var tbody = document.getElementById("tablaCola"); tbody.innerHTML = "";
+      var contador = 0, sonandoAlgo = false, proximaTrack = null;
+      if (!rawColaData) { document.getElementById("lblContador").innerText = "0 en espera"; document.getElementById("contenedorPlayerHTML5").innerHTML = ""; idUltimoVideoCargado = ""; return; }
+
+      Object.keys(rawColaData).forEach(key => {
+        var item = rawColaData[key];
+        
+        if (item.estado === "Pendiente ID") {
+          ejecutarBusquedaProxyMaster(key, item.titulo);
+        }
+
+        if (item.estado === "Pendiente ID" || item.estado === "En espera" || item.estado === "Sonando") {
+          if (item.estado === "En espera" || item.estado === "Pendiente ID") { 
+            contador++; 
+            if (!proximaTrack && item.estado === "En espera") proximaTrack = { key: key, item: item }; 
+          }
+          if (item.estado === "Sonando") { sonandoAlgo = true; cancionActualKey = key; document.getElementById("lblTrack").innerText = "🔊 " + item.titulo; forzarCargaIframeHTML5(item.id); }
+          
+          var badge = "is-link";
+          if(item.estado === "Sonando") badge = "is-warning";
+          if(item.estado === "Pendiente ID") badge = "is-dark";
+
+          tbody.innerHTML += `<tr>
+            <td><strong>${item.usuario}</strong></td>
+            <td>${item.titulo}</td>
+            <td>${item.hora}</td>
+            <td class="has-text-right">
+              <span class="tag ${badge} has-text-weight-bold">${item.estado === "Pendiente ID" ? "Buscando..." : item.estado}</span>
+              <button class="button is-small is-danger ml-2 has-text-weight-bold" onclick="saltarTemaMaster('${key}')">Saltar</button>
+            </td>
+          </tr>`;
+        }
+      });
+      document.getElementById("lblContador").innerText = contador + " en espera";
+      
+      if (!sonandoAlgo && proximaTrack) db.ref("colas/" + sedeLimpia + "/" + proximaTrack.key).update({ estado: "Sonando" });
+      else if (!sonandoAlgo && !proximaTrack) { document.getElementById("contenedorPlayerHTML5").innerHTML = ""; idUltimoVideoCargado = ""; document.getElementById("lblTrack").innerText = "Radio en pausa."; }
+    }
+
+    function renderAuditoriaMaster(usuarios) {
+      var tbody = document.getElementById("tablaAuditoria"); tbody.innerHTML = ""; var f = new Date().toISOString().slice(0, 10); if(!usuarios) return;
+      Object.keys(usuarios).forEach(uid => {
+        var u = usuarios[uid]; 
+        if (u.sedeFija !== sedeSeleccionadaOriginal) return;
+
+        var ped = (u.fechas && u.fechas[f]) ? u.fechas[f] : 0; var disp = (20 + (u.ajustes_cuota || 0)) - ped; if(disp < 0) disp = 0;
+        
+        var botonBanHTML = u.baneado ? 
+          `<button class="button is-small is-success has-text-weight-bold" onclick="alternarBanMaster('${uid}', false)">UNBAN</button>` : 
+          `<button class="button is-small is-danger has-text-weight-bold" onclick="alternarBanMaster('${uid}', true)">BAN</button>`;
+
+        tbody.innerHTML += `<tr>
+          <td><strong>${u.nombre || 'Colaborador'}</strong><br><small class="has-text-grey-light">${u.correo || ''}</small></td>
+          <td>Peticiones: <strong class="has-text-warning">${ped}</strong> | Libres: <strong class="has-text-success">${disp}</strong></td>
+          <td><span class="tag ${u.baneado?'is-danger':'is-success'} has-text-weight-bold">${u.baneado?'SUSPENDIDO':'ACTIVO'}</span></td>
+          <td class="has-text-right">
+            <button class="button is-small is-dark" style="border:1px solid #444; color:#fff;" onclick="modificarCuotaMaster('${uid}',1)">➕ 1</button>
+            <button class="button is-small is-dark ml-1" style="border:1px solid #444; color:#fff;" onclick="modificarCuotaMaster('${uid}',-1)">⚠️ -1</button>
+            <span class="ml-3">${botonBanHTML}</span>
+          </td></tr>`;
+      });
+    }
+
+    function saltarTemaMaster(key) {
+      if(confirm("¿Saltar canción seleccionada?")) {
+        db.ref("colas/" + sedeLimpia + "/" + key).update({ estado: "Saltada" });
+        if(key === cancionActualKey) { 
+          cancionActualKey = null; 
+          idUltimoVideoCargado = ""; 
+          document.getElementById("contenedorPlayerHTML5").innerHTML = `<div style="color: #444; display: flex; align-items: center; justify-content: center; height: 100%; font-size: 0.9rem;">Cargando siguiente pista...</div>`; 
+        }
+      }
+    }
+    function modificarCuotaMaster(uid, v) { db.ref("usuarios/" + uid + "/ajustes_cuota").transaction(a => (a || 0) + v); }
+    function alternarBanMaster(uid, est) { db.ref("usuarios/" + uid + "/baneado").set(est); }
+  </script>
+</body>
+</html>
