@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radio Noble - Pedir Canción</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background-color: #1a1a2e; color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;}
+    .box-peticion { background: #162447; border-radius: 12px; padding: 30px; max-width: 500px; width: 100%; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+    .label { color: #fff !important; }
+    .input, .select select { background-color: #1f4068 !important; color: #fff !important; border: 1px solid #162447 !important; }
+    .input::placeholder { color: #85a3b2; }
+  </style>
+</head>
+<body>
+
+  <div class="box-peticion">
+    <div class="has-text-centered mb-5">
+      <h1 class="title is-3 has-text-warning"><i class="fa-solid fa-music"></i> Radio Noble</h1>
+      <p class="subtitle is-6 has-text-grey-light">Pide tu canción favorita para tu sede</p>
+    </div>
+
+    <form id="formPeticion" onsubmit="enviarPeticion(event)">
+      <div class="field">
+        <label class="label">Tu Nombre / Puesto:</label>
+        <div class="control">
+          <input class="input" type="text" id="txtUsuario" placeholder="Ej: Jhonger - Puesto B3" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Sede de transmisión:</label>
+        <div class="control">
+          <div class="select is-fullwidth">
+            <select id="selectSede">
+              <option value="Valentía (Frontino)">Valentía (Frontino)</option>
+              <option value="Unión Noble (Central)">Unión Noble (Central)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Nombre de la Canción:</label>
+        <div class="control">
+          <input class="input" type="text" id="txtCancion" placeholder="Ej: Luna" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Artista / Grupo:</label>
+        <div class="control">
+          <input class="input" type="text" id="txtArtista" placeholder="Ej: Feid" required>
+        </div>
+      </div>
+
+      <button class="button is-warning is-fullwidth mt-5 has-text-weight-bold" id="btnEnviar" type="submit">
+        <span class="icon"><i class="fa-solid fa-paper-plane"></i></span>
+        <span>Enviar a la Cola</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- Carga de las librerías oficiales de Firebase (Versión de compatibilidad estable) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <script>
+   // 🔌 Tus credenciales oficiales de Radio Noble 2026
+    const firebaseConfig = {
+      apiKey: "AIzaSyDbFvZMgoIvN_1Hp_7l-WJ4dLvWI0GQi_I",
+      authDomain: "radionoble-a040c.firebaseapp.com",
+      databaseURL: "https://radionoble-a040c-default-rtdb.firebaseio.com",
+      projectId: "radionoble-a040c",
+      storageBucket: "radionoble-a040c.firebasestorage.app",
+      messagingSenderId: "541307166879",
+      appId: "1:541307166879:web:34475c1d77f849e7afc2aa"
+    };
+
+    // Inicializamos la conexión con tu base de datos
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Función del Buscador Distribuido (0% cuota del servidor)
+    function buscarIdEnYouTube(track) {
+      return new Promise((resolve) => {
+        var query = track + " lyrics";
+        var cbName = "ytClient_" + Math.floor(Math.random() * 100000);
+        window[cbName] = function(data) {
+          document.getElementById(cbName).remove();
+          delete window[cbName];
+          if (data && data[1] && data[1][0]) {
+            var urlProxy = "https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=none&url=" + encodeURIComponent("https://www.youtube.com/results?search_query=" + encodeURIComponent(data[1][0]));
+            fetch(urlProxy).then(r => r.text()).then(html => {
+              var match = html.match(/\/vi\/([a-zA-Z0-9_-]{11})\//);
+              resolve(match ? match[1] : "kJQP7kiw5Fk");
+            }).catch(() => resolve("kJQP7kiw5Fk"));
+          } else { resolve("kJQP7kiw5Fk"); }
+        };
+        var script = document.createElement('script');
+        script.id = cbName;
+        script.src = "https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&q=" + encodeURIComponent(query) + "&callback=" + cbName;
+        document.body.appendChild(script);
+      });
+    }
+
+    async function enviarPeticion(event) {
+      event.preventDefault();
+      var btn = document.getElementById("btnEnviar");
+      btn.classList.add("is-loading");
+
+      var usuario = document.getElementById("txtUsuario").value.trim();
+      var sede = document.getElementById("selectSede").value;
+      var cancion = document.getElementById("txtCancion").value.trim();
+      var artista = document.getElementById("txtArtista").value.trim();
+      var tituloCompleto = artista + " - " + cancion;
+
+      // Buscamos el ID real desde el dispositivo del usuario
+      var videoId = await buscarIdEnYouTube(tituloCompleto);
+
+      // Guardamos directamente en la rama de la sede en Firebase
+      var ramaSede = sede.replace(/[^a-zA-Z0-9]/g, ""); // Limpia espacios o caracteres raros para la base de datos
+      
+      db.ref("colas/" + ramaSede).push({
+        usuario: usuario,
+        titulo: tituloCompleto,
+        id: videoId,
+        hora: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        estado: "En espera"
+      }, function(error) {
+        btn.classList.remove("is-loading");
+        if (error) {
+          alert("Error al enviar la petición. Revisa la consola.");
+        } else {
+          alert("¡Canción enviada con éxito a la cola!");
+          document.getElementById("txtCancion").value = "";
+          document.getElementById("txtArtista").value = "";
+        }
+      });
+    }
+  </script>
+</body>
+</html>

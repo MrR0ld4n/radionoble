@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radio Noble - Administrador de Sede</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background-color: #1a1a2e; color: #fff; padding: 20px; min-height: 100vh;}
+    .card-reproductor { background: #162447; border: none; padding: 20px; border-radius: 8px; }
+    .contenedor-scroll-cola { max-height: 340px; overflow-y: auto; border-radius: 6px; background: #1f4068; padding-right: 5px; }
+    .table { background: #1f4068 !important; color: #ffffff !important; width: 100% !important; margin-bottom: 0 !important;}
+    .table th { color: #ffffff !important; background-color: #162447; position: sticky; top: 0; z-index: 10; font-weight: 700; } 
+    .table td { color: #ffffff !important; background-color: #1f4068 !important; vertical-align: middle; border-bottom: 1px solid #162447;}
+    .table tr { background-color: #1f4068 !important; }
+    .seccion-admin { margin-top: 30px; background: #162447; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
+    .box-select-sede { max-width: 400px; margin: 40px auto; background: #162447; padding: 25px; border-radius: 8px; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <!-- Selector de Entrada para Sintonizar Sede -->
+  <div id="pantallaSede" class="box-select-sede">
+    <h2 class="title is-4 has-text-warning">📻 Panel de Monitoreo</h2>
+    <div class="field my-4">
+      <div class="control">
+        <div class="select is-fullwidth">
+          <select id="configSede">
+            <option value="Valentía (Frontino)">Valentía (Frontino)</option>
+            <option value="Unión Noble (Central)">Unión Noble (Central)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <button class="button is-warning is-fullwidth" onclick="conectarSede()">Sintonizar Frecuencia</button>
+  </div>
+
+  <!-- Interfaz de Control Principal -->
+  <div id="interfazPrincipal" style="display: none;">
+    <div class="container-fluid">
+      <div class="columns">
+        <div class="column is-4">
+          <div class="card-reproductor">
+            <h2 class="title is-4 has-text-warning" id="lblSedeActiva">📺 Sintonizando...</h2>
+            <!-- El reproductor visual nativo clásico -->
+            <div id="player" style="width: 100%; height: 260px; background: #000; border-radius: 6px;"></div>
+            <p class="is-size-7 has-text-centered has-text-grey-light mt-2" id="lblTrack">Esperando tema musical...</p>
+          </div>
+        </div>
+
+        <div class="column is-8">
+          <div class="box" style="background:#162447;">
+            <h2 class="title is-4 has-text-link-light level">
+              <span class="level-left">📋 Control de Canciones y Cola Actual</span>
+              <span class="tag is-info is-medium level-right" id="lblContador">0 en espera</span>
+            </h2>
+            <div class="contenedor-scroll-cola">
+              <table class="table is-fullwidth">
+                <thead>
+                  <tr>
+                    <th>Solicitante</th>
+                    <th>Canción Solicitada</th>
+                    <th>Hora</th>
+                    <th>Estado / Acción</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaCola"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección de Auditoría e Historial -->
+    <div class="seccion-admin">
+      <h2 class="title is-4 has-text-danger-light">📊 Registro Histórico de Transmisión</h2>
+      <table class="table is-fullwidth">
+        <thead>
+          <tr>
+            <th>Colaborador</th>
+            <th>Tema Musical</th>
+            <th>Hora Registro</th>
+            <th>Estado Final</th>
+          </tr>
+        </thead>
+        <tbody id="tablaHistorial"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
+
+  <script>
+    // 🔌 Tus credenciales oficiales de Radio Noble 2026
+    const firebaseConfig = {
+      apiKey: "AIzaSyDbFvZMgoIvN_1Hp_7l-WJ4dLvWI0GQi_I",
+      authDomain: "radionoble-a040c.firebaseapp.com",
+      databaseURL: "https://radionoble-a040c-default-rtdb.firebaseio.com",
+      projectId: "radionoble-a040c",
+      storageBucket: "radionoble-a040c.firebasestorage.app",
+      messagingSenderId: "541307166879",
+      appId: "1:541307166879:web:34475c1d77f849e7afc2aa"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    var player;
+    var sedeActivaLimpia = "";
+    var cancionActualKey = null;
+    var listaCancionesLocales = [];
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: '260', width: '100%', videoId: '',
+        playerVars: { 'autoplay': 1, 'controls': 1, 'rel': 0 },
+        events: { 'onStateChange': onPlayerStateChange, 'onError': onPlayerError }
+      });
+    }
+
+    function conectarSede() {
+      var sedeOriginal = document.getElementById("configSede").value;
+      sedeActivaLimpia = sedeOriginal.replace(/[^a-zA-Z0-9]/g, "");
+
+      document.getElementById("lblSedeActiva").innerText = "📻 Radio Noble - " + sedeOriginal.split(" ")[0];
+      document.getElementById("pantallaSede").style.display = "none";
+      document.getElementById("interfazPrincipal").style.display = "block";
+
+      // ⚡ ESCUCHA ACTIVA EN TIEMPO REAL: Firebase nos avisa si hay cambios sin recargar
+      db.ref("colas/" + sedeActivaLimpia).on("value", function(snapshot) {
+        var data = snapshot.val();
+        renderizarTablas(data);
+      });
+    }
+
+    function renderizarTablas(data) {
+      var tbodyCola = document.getElementById("tablaCola");
+      var tbodyHistorial = document.getElementById("tablaHistorial");
+      
+      tbodyCola.innerHTML = "";
+      tbodyHistorial.innerHTML = "";
+      
+      listaCancionesLocales = [];
+      var contadorEspera = 0;
+      var temaSonandoActualmente = false;
+
+      if (!data) {
+        document.getElementById("lblContador").innerText = "0 en espera";
+        return;
+      }
+
+      // Convertimos el objeto en un array ordenado
+      Object.keys(data).forEach(function(key) {
+        var item = data[key];
+        item.key = key;
+        
+        if (item.estado === "En espera" || item.estado === "Sonando") {
+          listaCancionesLocales.push(item);
+          if (item.estado === "En espera") contadorEspera++;
+          if (item.estado === "Sonando") {
+            temaSonandoActualmente = true;
+            cancionActualKey = key;
+            document.getElementById("lblTrack").innerText = "🔊 " + item.titulo;
+            // Si cambió el ID, lo cargamos en el reproductor clásico
+            if(player && typeof player.loadVideoById === 'function' && player.getVideoData && player.getVideoData().video_id !== item.id) {
+              player.loadVideoById(item.id, 0);
+            }
+          }
+
+          var tagColor = item.estado === "Sonando" ? "is-warning" : "is-info";
+          tbodyCola.innerHTML += `<tr>
+            <td><strong>${item.usuario}</strong></td>
+            <td>${item.titulo}</td>
+            <td>${item.hora}</td>
+            <td>
+              <span class="tag ${tagColor}">${item.estado}</span>
+              <button class="button is-small is-danger ml-2" onclick="saltarTema('${key}')">❌ Saltar</button>
+            </td>
+          </tr>`;
+        } else {
+          // Historial de canciones terminadas o saltadas
+          tbodyHistorial.innerHTML += `<tr>
+            <td>${item.usuario}</td>
+            <td>${item.titulo}</td>
+            <td>${item.hora}</td>
+            <td><span class="tag is-light">${item.estado}</span></td>
+          </tr>`;
+        }
+      });
+
+      document.getElementById("lblContador").innerText = contadorEspera + " en espera";
+
+      // Piloto Automático: Si no hay nada sonando pero hay temas en espera, activa el primero
+      if (!temaSonandoActualmente && listaCancionesLocales.length > 0) {
+        var proxima = listaCancionesLocales.find(i => i.estado === "En espera");
+        if (proxima) {
+          db.ref("colas/" + sedeActivaLimpia + "/" + proxima.key).update({ estado: "Sonando" });
+        }
+      }
+    }
+
+    function onPlayerStateChange(event) {
+      // Cuando la canción termina de reproducirse de forma natural
+      if (event.data == YT.PlayerState.ENDED && cancionActualKey) {
+        db.ref("colas/" + sedeActivaLimpia + "/" + cancionActualKey).update({ estado: "Finalizada" });
+        cancionActualKey = null;
+      }
+    }
+
+    function onPlayerError(event) {
+      console.warn("Video no disponible o con bloqueo, saltando automático...");
+      if (cancionActualKey) {
+        db.ref("colas/" + sedeActivaLimpia + "/" + cancionActualKey).update({ estado: "Saltada (Error)" });
+        cancionActualKey = null;
+      }
+    }
+
+    function saltarTema(key) {
+      if (confirm("¿Quieres saltar esta canción?")) {
+        db.ref("colas/" + sedeActivaLimpia + "/" + key).update({ estado: "Saltada" });
+        if (key === cancionActualFila && player && typeof player.stopVideo === 'function') {
+          player.stopVideo();
+          cancionActualKey = null;
+        }
+      }
+    }
+  </script>
+</body>
+</html>
